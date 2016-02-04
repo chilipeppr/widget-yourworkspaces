@@ -144,7 +144,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
 
             var that = this;
             $.ajax({
-                url: "http://www.chilipeppr.com/datagetallkeys",
+                url: "http://chilipeppr.com/datagetallkeys",
                 xhrFields: {
                     withCredentials: true
                 }
@@ -174,7 +174,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                         });
                         var name = item.Name.replace(/^userUrl:/, "");
                         keylist += '<li><a href="http://chilipeppr.com/' + 
-                            name + '">' + name + '</li>';
+                            name + '">chilipeppr.com/' + name + '</li>';
                     }
                 });
                 keylist += "</ul>";

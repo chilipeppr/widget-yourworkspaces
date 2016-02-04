@@ -170,7 +170,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
 
             var that = this;
             $.ajax({
-                url: "http://www.chilipeppr.com/datagetallkeys",
+                url: "http://chilipeppr.com/datagetallkeys",
                 xhrFields: {
                     withCredentials: true
                 }
@@ -200,7 +200,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                         });
                         var name = item.Name.replace(/^userUrl:/, "");
                         keylist += '<li><a href="http://chilipeppr.com/' + 
-                            name + '">' + name + '</li>';
+                            name + '">chilipeppr.com/' + name + '</li>';
                     }
                 });
                 keylist += "</ul>";
@@ -344,7 +344,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                     </div>
                     
                 </div>
-                <div class="modal-footer xhidden">
+                <div class="modal-footer hidden">
 
                     <button type="button" class="btn btn-default" data-delay="500" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Close" data-content="Close the dialog"><span class="">Close</span>
 
