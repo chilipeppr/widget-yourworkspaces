@@ -150,7 +150,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                 }
             })
             .done(function( data ) {
-                debugger;
+                //debugger;
                 // see if error
                 if (data.Error) {
                     // we got json, but it's error
