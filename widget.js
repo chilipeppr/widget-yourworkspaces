@@ -67,12 +67,12 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
          * The ID of the widget. You must define this and make it unique.
          */
         id: "com-chilipeppr-widget-yourworkspaces", // Make the id the same as the cpdefine id
-        name: "Widget / yourworkspaces", // The descriptive name of your widget.
-        desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this yourworkspaces and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
-        url: "(auto fill by runme.js)",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
+        name: "Widget / Your Workspaces", // The descriptive name of your widget.
+        desc: "This widget lets you see a list of your workspaces. It queries ChiliPeppr's cloud storage to see what workspaces you have created and then displays a link to each workspace.",
+        url: "(auto fill by runme.js)", // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "(auto fill by runme.js)", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
         githuburl: "(auto fill by runme.js)", // The backing github repo
-        testurl: "(auto fill by runme.js)",   // The standalone working widget so can view it working by itself
+        testurl: "(auto fill by runme.js)", // The standalone working widget so can view it working by itself
         /**
          * Define pubsub signals below. These are basically ChiliPeppr's event system.
          * ChiliPeppr uses amplify.js's pubsub system so please refer to docs at
@@ -84,7 +84,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
          */
         publish: {
             // Define a key:value pair here as strings to document what signals you publish.
-            '/onExampleGenerate': 'Example: Publish this signal when we go to generate gcode.'
+            //'/onExampleGenerate': 'Example: Publish this signal when we go to generate gcode.'
         },
         /**
          * Define the subscribe signals that this widget/element owns or defines so that
@@ -127,7 +127,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             }
             this.getUserDataKeysFromChiliPepprStorage();
             this.setupUiFromLocalStorage();
-            this.btnSetup();
+
             this.forkSetup();
 
             this.isInitted = true;
@@ -135,13 +135,13 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             console.log("I am done being initted.");
         },
         getUserDataKeysFromChiliPepprStorage: function() {
-            
+
             console.log("Doing getUserDataKeysFromChiliPepprStorage");
-            
+
             // this queries chilipeppr's storage facility to see what
             // keys are available for the user
             $('#' + this.id + ' .alert-warning').addClass('hidden');
-            
+
             var that = this;
             $.ajax({
                 url: "http://www.chilipeppr.com/datagetallkeys",
@@ -149,8 +149,8 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                     withCredentials: true
                 }
             })
-            .done(function( data ) {
-                //debugger;
+            .done(function(data) {
+
                 // see if error
                 if (data.Error) {
                     // we got json, but it's error
@@ -159,104 +159,38 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                         .removeClass('hidden');
                     return;
                 }
-                    
+
                 // loop thru keys and get org-jscut ones
                 var keys = [];
-                var keylist = "<ol>";
+                var keylist = "<ul>";
                 data.forEach(function(item) {
                     console.log("item:", item);
-                    if (item.Name) { // && item.Name.match(/workspace/)) {
+                    if (item.Name && item.Name.match(/^userUrl:/)) {
                         // we have a jscut file
                         keys.push({
-                            name: item.Name, 
+                            name: item.Name,
                             created: item.CreateDate,
                             size: item.ValueSize
                         });
-                        keylist += "<li>" + item.Name + "</li>";
+                        var name = item.Name.replace(/^userUrl:/, "");
+                        keylist += '<li><a href="http://chilipeppr.com/' + 
+                            name + '">' + name + '</li>';
                     }
                 });
-                keylist += "</ol>";
-                
+                keylist += "</ul>";
+
                 $('#' + that.id + " .keylist").html(keylist);
                 console.log("added keylist:", keylist);
-                
+
             });
         },
-        show: function (options) {
-            
+        show: function(options) {
+
             $("#" + this.id).modal('show');
-            
+
         },
-        hide: function () {
+        hide: function() {
             $("#" + this.id).modal('hide');
-        },
-        /**
-         * Call this method from init to setup all the buttons when this widget
-         * is first loaded. This basically attaches click events to your 
-         * buttons. It also turns on all the bootstrap popovers by scanning
-         * the entire DOM of the widget.
-         */
-        btnSetup: function() {
-
-            // Chevron hide/show body
-            var that = this;
-            $('#' + this.id + ' .hidebody').click(function(evt) {
-                console.log("hide/unhide body");
-                if ($('#' + that.id + ' .panel-body').hasClass('hidden')) {
-                    // it's hidden, unhide
-                    that.showBody(evt);
-                }
-                else {
-                    // hide
-                    that.hideBody(evt);
-                }
-            });
-
-            // Ask bootstrap to scan all the buttons in the widget to turn
-            // on popover menus
-            $('#' + this.id + ' .btn').popover({
-                delay: 1000,
-                animation: true,
-                placement: "auto",
-                trigger: "hover",
-                container: 'body'
-            });
-
-            // Init Say Hello Button on Main Toolbar
-            // We are inlining an anonymous method as the callback here
-            // as opposed to a full callback method in the Hello Word 2
-            // example further below. Notice we have to use "that" so 
-            // that the this is set correctly inside the anonymous method
-            $('#' + this.id + ' .btn-sayhello').click(function() {
-                console.log("saying hello");
-                // Make sure popover is immediately hidden
-                $('#' + that.id + ' .btn-sayhello').popover("hide");
-                // Show a flash msg
-                chilipeppr.publish(
-                    "/com-chilipeppr-elem-flashmsg/flashmsg",
-                    "Hello Title",
-                    "Hello World from widget " + that.id,
-                    1000
-                );
-            });
-
-            // Init Hello World 2 button on Tab 1. Notice the use
-            // of the slick .bind(this) technique to correctly set "this"
-            // when the callback is called
-            $('#' + this.id + ' .btn-helloworld2').click(this.onHelloBtnClick.bind(this));
-
-        },
-        /**
-         * onHelloBtnClick is an example of a button click event callback
-         */
-        onHelloBtnClick: function(evt) {
-            console.log("saying hello 2 from btn in tab 1");
-            chilipeppr.publish(
-                '/com-chilipeppr-elem-flashmsg/flashmsg',
-                "Hello 2 Title",
-                "Hello World 2 from Tab 1 from widget " + this.id,
-                2000 /* show for 2 second */
-            );
         },
         /**
          * User options are available in this property for reference by your
@@ -297,13 +231,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             this.options = options;
             console.log("options:", options);
 
-            // show/hide body
-            if (options.showBody) {
-                this.showBody();
-            }
-            else {
-                this.hideBody();
-            }
+
 
         },
         /**
@@ -320,42 +248,6 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             console.log("saving options:", options, "json.stringify:", optionsStr);
             // store settings to localStorage
             localStorage.setItem(this.id + '-options', optionsStr);
-        },
-        /**
-         * Show the body of the panel.
-         * @param {jquery_event} evt - If you pass the event parameter in, we 
-         * know it was clicked by the user and thus we store it for the next 
-         * load so we can reset the user's preference. If you don't pass this 
-         * value in we don't store the preference because it was likely code 
-         * that sent in the param.
-         */
-        showBody: function(evt) {
-            $('#' + this.id + ' .panel-body').removeClass('hidden');
-            $('#' + this.id + ' .panel-footer').removeClass('hidden');
-            $('#' + this.id + ' .hidebody span').addClass('glyphicon-chevron-up');
-            $('#' + this.id + ' .hidebody span').removeClass('glyphicon-chevron-down');
-            if (!(evt == null)) {
-                this.options.showBody = true;
-                this.saveOptionsLocalStorage();
-            }
-        },
-        /**
-         * Hide the body of the panel.
-         * @param {jquery_event} evt - If you pass the event parameter in, we 
-         * know it was clicked by the user and thus we store it for the next 
-         * load so we can reset the user's preference. If you don't pass this 
-         * value in we don't store the preference because it was likely code 
-         * that sent in the param.
-         */
-        hideBody: function(evt) {
-            $('#' + this.id + ' .panel-body').addClass('hidden');
-            $('#' + this.id + ' .panel-footer').addClass('hidden');
-            $('#' + this.id + ' .hidebody span').removeClass('glyphicon-chevron-up');
-            $('#' + this.id + ' .hidebody span').addClass('glyphicon-chevron-down');
-            if (!(evt == null)) {
-                this.options.showBody = false;
-                this.saveOptionsLocalStorage();
-            }
         },
         /**
          * This method loads the pubsubviewer widget which attaches to our 
@@ -384,9 +276,9 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             });
 
             var that = this;
-            chilipeppr.load("http://fiddle.jshell.net/chilipeppr/zMbL9/show/light/", function() {
+            chilipeppr.load("http://raw.githubusercontent.com/chilipeppr/widget-pubsubviewer/master/auto-generated-widget.html", function() {
                 require(['inline:com-chilipeppr-elem-pubsubviewer'], function(pubsubviewer) {
-                    pubsubviewer.attachTo($(topCssSelector + ' .panel-heading .dropdown-menu'), that);
+                    pubsubviewer.attachTo($(topCssSelector + ' .modal-header .dropdown-menu'), that);
                 });
             });
 
