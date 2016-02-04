@@ -135,11 +135,14 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             console.log("I am done being initted.");
         },
         getUserDataKeysFromChiliPepprStorage: function() {
+            
+            console.log("Doing getUserDataKeysFromChiliPepprStorage");
+            
             // this queries chilipeppr's storage facility to see what
             // keys are available for the user
-            var that = this;
             $('#' + this.id + ' .alert-warning').addClass('hidden');
-
+            
+            var that = this;
             $.ajax({
                 url: "http://www.chilipeppr.com/datagetallkeys",
                 xhrFields: {
@@ -147,11 +150,13 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                 }
             })
             .done(function( data ) {
-                
+                debugger;
                 // see if error
                 if (data.Error) {
                     // we got json, but it's error
-                    $('#' + this.id + ' .alert-warning').html("<p>We can't retrieve your data from ChiliPeppr because you are not logged in. Please login to ChiliPeppr to see your list of available data keys.</p><p>Error: " + data.Msg + "</p>").removeClass('hidden');
+                    $('#' + that.id + ' .alert-warning')
+                        .html("<p>We can't retrieve your data from ChiliPeppr because you are not logged in. Please login to ChiliPeppr to see your list of available data keys.</p><p>Error: " + data.Msg + "</p>")
+                        .removeClass('hidden');
                     return;
                 }
                     
@@ -160,7 +165,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                 var keylist = "<ol>";
                 data.forEach(function(item) {
                     console.log("item:", item);
-                    if (item.Name && item.Name.match(/workspace/)) {
+                    if (item.Name) { // && item.Name.match(/workspace/)) {
                         // we have a jscut file
                         keys.push({
                             name: item.Name, 
@@ -172,7 +177,8 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                 });
                 keylist += "</ol>";
                 
-                $('#' + this.id + " .keylist").html(keylist);
+                $('#' + that.id + " .keylist").html(keylist);
+                console.log("added keylist:", keylist);
                 
             });
         },
