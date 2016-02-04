@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-    <title>Widget / Template</title>
+    <title>Widget / yourworkspaces</title>
 
     <!-- ChiliPeppr is based on bootstrap CSS. -->
     <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -16,14 +16,9 @@
     <style type='text/css'>
 /* CSS for ChiliPeppr Widget */
 
-#com-chilipeppr-widget-template {
+#com-chilipeppr-widget-yourworkspaces {
    
 }
-
-#com-chilipeppr-widget-template .nav-tabs>li>a {
-    padding: 2px 6px;
-}
-
 
     </style>
 
@@ -65,7 +60,7 @@ requirejs.config({
     }
 });
 
-cprequire_test(["inline:com-chilipeppr-widget-template"], function(myWidget) {
+cprequire_test(["inline:com-chilipeppr-widget-yourworkspaces"], function(myWidget) {
 
     // Test this element. This code is auto-removed by the chilipeppr.load()
     // when using this widget in production. So use the cpquire_test to do things
@@ -83,40 +78,27 @@ cprequire_test(["inline:com-chilipeppr-widget-template"], function(myWidget) {
 
     console.log("test running of " + myWidget.id);
 
-    $('body').prepend('<div id="testDivForFlashMessageWidget"></div>');
-
-    chilipeppr.load(
-        "#testDivForFlashMessageWidget",
-        "http://fiddle.jshell.net/chilipeppr/90698kax/show/light/",
-        function() {
-            console.log("mycallback got called after loading flash msg module");
-            cprequire(["inline:com-chilipeppr-elem-flashmsg"], function(fm) {
-                //console.log("inside require of " + fm.id);
-                fm.init();
-            });
-        }
-    );
-
     // init my widget
     myWidget.init();
-    $('#' + myWidget.id).css('margin', '10px');
+    myWidget.show();
+    //$('#' + myWidget.id).css('margin', '10px');
     $('title').html(myWidget.name);
 
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other dependencies here */ ], function() {
+cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* other dependencies here */ ], function() {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
          */
-        id: "com-chilipeppr-widget-template", // Make the id the same as the cpdefine id
-        name: "Widget / Template", // The descriptive name of your widget.
-        desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
-        url: "http://raw.githubusercontent.com/chilipeppr/widget-template/master/auto-generated-widget.html",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
-        fiddleurl: "http://ide.c9.io/chilipeppr/widget-template", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
-        githuburl: "http://github.com/chilipeppr/widget-template", // The backing github repo
-        testurl: "http://widget-template-chilipeppr.c9users.io/widget.html",   // The standalone working widget so can view it working by itself
+        id: "com-chilipeppr-widget-yourworkspaces", // Make the id the same as the cpdefine id
+        name: "Widget / yourworkspaces", // The descriptive name of your widget.
+        desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this yourworkspaces and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
+        url: "http://raw.githubusercontent.com/chilipeppr/widget-yourworkspaces/master/auto-generated-widget.html",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
+        fiddleurl: "http://ide.c9.io/chilipeppr/widget-yourworkspaces", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
+        githuburl: "http://github.com/chilipeppr/widget-yourworkspaces", // The backing github repo
+        testurl: "http://widget-yourworkspaces-chilipeppr.c9users.io/widget.html",   // The standalone working widget so can view it working by itself
         /**
          * Define pubsub signals below. These are basically ChiliPeppr's event system.
          * ChiliPeppr uses amplify.js's pubsub system so please refer to docs at
@@ -157,6 +139,7 @@ cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other 
             // that are owned by foreign/other widgets.
             // '/com-chilipeppr-elem-dragdrop/ondropped': 'Example: We subscribe to this signal at a higher priority to intercept the signal. We do not let it propagate by returning false.'
         },
+        isInitted: false,
         /**
          * All widgets should have an init method. It should be run by the
          * instantiating code like a workspace or a different widget.
@@ -164,11 +147,68 @@ cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other 
         init: function() {
             console.log("I am being initted. Thanks.");
 
+            if (this.isInitted) {
+                console.log("we are already initted, exiting init");
+                return;
+            }
+            this.getUserDataKeysFromChiliPepprStorage();
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
 
+            this.isInitted = true;
+
             console.log("I am done being initted.");
+        },
+        getUserDataKeysFromChiliPepprStorage: function() {
+            // this queries chilipeppr's storage facility to see what
+            // keys are available for the user
+            var that = this;
+            $('#' + this.id + ' .alert-warning').addClass('hidden');
+
+            $.ajax({
+                url: "http://www.chilipeppr.com/datagetallkeys",
+                xhrFields: {
+                    withCredentials: true
+                }
+            })
+            .done(function( data ) {
+                
+                // see if error
+                if (data.Error) {
+                    // we got json, but it's error
+                    $('#' + this.id + ' .alert-warning').html("<p>We can't retrieve your data from ChiliPeppr because you are not logged in. Please login to ChiliPeppr to see your list of available data keys.</p><p>Error: " + data.Msg + "</p>").removeClass('hidden');
+                    return;
+                }
+                    
+                // loop thru keys and get org-jscut ones
+                var keys = [];
+                var keylist = "<ol>";
+                data.forEach(function(item) {
+                    console.log("item:", item);
+                    if (item.Name && item.Name.match(/workspace/)) {
+                        // we have a jscut file
+                        keys.push({
+                            name: item.Name, 
+                            created: item.CreateDate,
+                            size: item.ValueSize
+                        });
+                        keylist += "<li>" + item.Name + "</li>";
+                    }
+                });
+                keylist += "</ol>";
+                
+                $('#' + this.id + " .keylist").html(keylist);
+                
+            });
+        },
+        show: function (options) {
+            
+            $("#" + this.id).modal('show');
+            
+        },
+        hide: function () {
+            $("#" + this.id).modal('hide');
         },
         /**
          * Call this method from init to setup all the buttons when this widget
@@ -380,60 +420,43 @@ cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other 
 </head>
 
 <body>
-    <div id="com-chilipeppr-widget-template" class="panel panel-default">
-        <div class="panel-heading ">
+    <div id="com-chilipeppr-widget-yourworkspaces" class="modal fade">
 
-            <div class="btn-toolbar pull-right" role="toolbar">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-xs btn-default btn-sayhello" data-delay="1000" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Say Hello" data-content="Generate a hello message">Say Hello
-                    </button>
+        <div class="modal-dialog modal-lg zhigh">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="btn-toolbar pull-right" role="toolbar">
+                        <div class="btn-group">
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span>
+
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                            </div>
+                        </div>
+                    </div> <span class="modal-title" data-toggle="popover">Your Workspaces</span> <span style="font-size:9px;" class="fb-build"></span>
+
                 </div>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-xs btn-default hidebody"><span class="glyphicon glyphicon-chevron-up"></span>
-                    </button>
-                </div>
-                <div class="btn-group">
-                    <div class="dropdown">
-                        <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                <div class="modal-body">
+
+                    <div class="alert alert-warning hidden">You are not logged in, so can't show any data. Please login.</div>
+                    
+                    <div class="keylist">
+                        
                     </div>
+                    
                 </div>
-            </div> <span class="panel-title" data-toggle="popover">Template Widget</span> <span style="font-size:9px;" class="fb-build">v1</span>
+                <div class="modal-footer xhidden">
 
-        </div>
-        <div class="panel-body">
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="active"><a href="#com-chilipeppr-widget-template-tab1" role="tab" data-toggle="tab">Tab 1</a>
-                </li>
-                <li><a href="#com-chilipeppr-widget-template-tab2" role="tab" data-toggle="tab">Tab 2</a></li>
-                <li><a href="#com-chilipeppr-widget-template-tab3" role="tab" data-toggle="tab">Tab 3</a></li>
-            </ul>
-            <!-- Tab panes -->
+                    <button type="button" class="btn btn-default" data-delay="500" data-animation="true" data-placement="auto" data-container="body" data-trigger="hover" data-title="Close" data-content="Close the dialog"><span class="">Close</span>
 
-            <!-- Tab 1 -->
-            <div class="tab-content">
-                <div class="tab-pane active" id="com-chilipeppr-widget-template-tab1">
-                    <p>This is the content of tab 1.</p>
-                    <div class="">
-                        <button type="button" class="btn btn-xs btn-default btn-helloworld2" style="margin: 4px 0;">Hello World 2</button>
-                    </div>
+                    </button>
+
                 </div>
-
-                <!-- Tab 2 -->
-                <div class="tab-pane" id="com-chilipeppr-widget-template-tab2">
-                    <p>This is the content of tab 2.</p>
-                </div>
-
-                <!-- Tab 3 -->
-                <div class="tab-pane" id="com-chilipeppr-widget-template-tab3">
-                    <p>This is the content of tab 3.</p>
-                </div>
-
             </div>
-
         </div>
+
+
     </div>
 </body>
 

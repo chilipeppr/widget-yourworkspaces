@@ -34,7 +34,7 @@ requirejs.config({
     }
 });
 
-cprequire_test(["inline:com-chilipeppr-widget-template"], function(myWidget) {
+cprequire_test(["inline:com-chilipeppr-widget-yourworkspaces"], function(myWidget) {
 
     // Test this element. This code is auto-removed by the chilipeppr.load()
     // when using this widget in production. So use the cpquire_test to do things
@@ -52,36 +52,23 @@ cprequire_test(["inline:com-chilipeppr-widget-template"], function(myWidget) {
 
     console.log("test running of " + myWidget.id);
 
-    $('body').prepend('<div id="testDivForFlashMessageWidget"></div>');
-
-    chilipeppr.load(
-        "#testDivForFlashMessageWidget",
-        "http://fiddle.jshell.net/chilipeppr/90698kax/show/light/",
-        function() {
-            console.log("mycallback got called after loading flash msg module");
-            cprequire(["inline:com-chilipeppr-elem-flashmsg"], function(fm) {
-                //console.log("inside require of " + fm.id);
-                fm.init();
-            });
-        }
-    );
-
     // init my widget
     myWidget.init();
-    $('#' + myWidget.id).css('margin', '10px');
+    myWidget.show();
+    //$('#' + myWidget.id).css('margin', '10px');
     $('title').html(myWidget.name);
 
 } /*end_test*/ );
 
 // This is the main definition of your widget. Give it a unique name.
-cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other dependencies here */ ], function() {
+cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* other dependencies here */ ], function() {
     return {
         /**
          * The ID of the widget. You must define this and make it unique.
          */
-        id: "com-chilipeppr-widget-template", // Make the id the same as the cpdefine id
-        name: "Widget / Template", // The descriptive name of your widget.
-        desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this template and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
+        id: "com-chilipeppr-widget-yourworkspaces", // Make the id the same as the cpdefine id
+        name: "Widget / yourworkspaces", // The descriptive name of your widget.
+        desc: "This example widget gives you a framework for creating your own widget. Please change this description once you fork this yourworkspaces and create your own widget. Make sure to run runme.js every time you are done editing your code so you can regenerate your README.md file, regenerate your auto-generated-widget.html, and automatically push your changes to Github.", // A description of what your widget does
         url: "(auto fill by runme.js)",       // The final URL of the working widget as a single HTML file with CSS and Javascript inlined. You can let runme.js auto fill this if you are using Cloud9.
         fiddleurl: "(auto fill by runme.js)", // The edit URL. This can be auto-filled by runme.js in Cloud9 if you'd like, or just define it on your own to help people know where they can edit/fork your widget
         githuburl: "(auto fill by runme.js)", // The backing github repo
@@ -126,6 +113,7 @@ cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other 
             // that are owned by foreign/other widgets.
             // '/com-chilipeppr-elem-dragdrop/ondropped': 'Example: We subscribe to this signal at a higher priority to intercept the signal. We do not let it propagate by returning false.'
         },
+        isInitted: false,
         /**
          * All widgets should have an init method. It should be run by the
          * instantiating code like a workspace or a different widget.
@@ -133,11 +121,68 @@ cpdefine("inline:com-chilipeppr-widget-template", ["chilipeppr_ready", /* other 
         init: function() {
             console.log("I am being initted. Thanks.");
 
+            if (this.isInitted) {
+                console.log("we are already initted, exiting init");
+                return;
+            }
+            this.getUserDataKeysFromChiliPepprStorage();
             this.setupUiFromLocalStorage();
             this.btnSetup();
             this.forkSetup();
 
+            this.isInitted = true;
+
             console.log("I am done being initted.");
+        },
+        getUserDataKeysFromChiliPepprStorage: function() {
+            // this queries chilipeppr's storage facility to see what
+            // keys are available for the user
+            var that = this;
+            $('#' + this.id + ' .alert-warning').addClass('hidden');
+
+            $.ajax({
+                url: "http://www.chilipeppr.com/datagetallkeys",
+                xhrFields: {
+                    withCredentials: true
+                }
+            })
+            .done(function( data ) {
+                
+                // see if error
+                if (data.Error) {
+                    // we got json, but it's error
+                    $('#' + this.id + ' .alert-warning').html("<p>We can't retrieve your data from ChiliPeppr because you are not logged in. Please login to ChiliPeppr to see your list of available data keys.</p><p>Error: " + data.Msg + "</p>").removeClass('hidden');
+                    return;
+                }
+                    
+                // loop thru keys and get org-jscut ones
+                var keys = [];
+                var keylist = "<ol>";
+                data.forEach(function(item) {
+                    console.log("item:", item);
+                    if (item.Name && item.Name.match(/workspace/)) {
+                        // we have a jscut file
+                        keys.push({
+                            name: item.Name, 
+                            created: item.CreateDate,
+                            size: item.ValueSize
+                        });
+                        keylist += "<li>" + item.Name + "</li>";
+                    }
+                });
+                keylist += "</ol>";
+                
+                $('#' + this.id + " .keylist").html(keylist);
+                
+            });
+        },
+        show: function (options) {
+            
+            $("#" + this.id).modal('show');
+            
+        },
+        hide: function () {
+            $("#" + this.id).modal('hide');
         },
         /**
          * Call this method from init to setup all the buttons when this widget
