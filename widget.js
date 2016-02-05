@@ -143,11 +143,12 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             $('#' + this.id + ' .alert-warning').addClass('hidden');
 
             var that = this;
-            $.ajax({
-                url: "http://chilipeppr.com/datagetallkeys",
-                xhrFields: {
-                    withCredentials: true
-                }
+
+            var jqxhr = $.ajax({
+                dataType: 'jsonp',
+                cache: true,
+                url: "http://chilipeppr.com/datagetallkeys?callback=?",
+                jsonpCallback: 'yourworkspacesCallback',
             })
             .done(function(data) {
 
