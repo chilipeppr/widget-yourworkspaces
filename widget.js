@@ -143,7 +143,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
             $('#' + this.id + ' .alert-warning').addClass('hidden');
 
             var that = this;
-            debugger;
+            //debugger;
             var jqxhr = $.ajax({
                 dataType: 'jsonp',
                 cache: false,
@@ -151,7 +151,7 @@ cpdefine("inline:com-chilipeppr-widget-yourworkspaces", ["chilipeppr_ready", /* 
                 //jsonpCallback: 'yourworkspacesCallback',
             })
             .done(function(data) {
-                debugger;
+                //debugger;
                 // see if error
                 if (data.Error) {
                     // we got json, but it's error
